@@ -23,6 +23,13 @@ Digital Finger Spelling（デジタル指話）は、日本語の 50 音を二�
 - Right hand (lower bits): 1 / 2 / 4 / 8 / 16
 - Left hand (upper bits): 32 / 64 / 128 / 256 / 512
 
+## Live Demo
+
+GitHub Pages 上でアプリを公開しています。
+ブラウザ上ですぐにデジタル指話を試すことができます。
+
+👉 https://akiplaylab.github.io/digital-finger-spelling/
+
 ## Status
 
 🚧 Work in progress
