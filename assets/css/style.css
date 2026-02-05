@@ -2,6 +2,10 @@
   font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 24px;
 }
@@ -11,13 +15,6 @@ body {
   border-radius: 12px;
   padding: 16px;
   max-width: 920px;
-}
-
-.pose.mainStage {
-  margin-top: 0;
-  display: grid;
-  justify-items: center;
-  gap: 12px;
 }
 
 .stageKana {
@@ -37,8 +34,15 @@ body {
   margin-top: 12px;
 }
 
+.pose.mainStage {
+  margin-top: 0;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
 .hand {
-  width: 420px;
+  width: min(100%, 420px);
 }
 
 .handBox {
@@ -206,4 +210,19 @@ body {
 
 .sequenceStatus.error {
   color: #842029;
+}
+
+@media (max-width: 640px) {
+  body {
+    margin: 12px;
+  }
+
+  h1 {
+    margin: 0 0 12px;
+    font-size: clamp(30px, 9vw, 42px);
+  }
+
+  .card {
+    padding: 12px;
+  }
 }
