@@ -1,0 +1,192 @@
+:root {
+  font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+}
+
+body {
+  margin: 24px;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.toggle {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+  user-select: none;
+}
+
+@media (max-width: 720px) {
+  .controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+select {
+  padding: 10px 12px;
+  font-size: 16px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 920px;
+}
+
+.pose {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  margin-top: 12px;
+}
+
+.hand {
+  width: 420px;
+}
+
+.handTitle {
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.handBox {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.fingers {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: flex-end;
+  height: 160px;
+}
+
+.finger {
+  width: 56px;
+  border-radius: 10px;
+  border: 1px solid #bbb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0;
+  font-weight: 700;
+  user-select: none;
+  background: #f3f3f3;
+  color: #777;
+}
+
+.up,
+.btn.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.finger.small {
+  height: 95px;
+}
+
+.finger.mid {
+  height: 125px;
+}
+
+.finger.tall {
+  height: 150px;
+}
+
+.finger .label {
+  font-weight: 800;
+}
+
+.finger .bit {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.finger.up .bit {
+  opacity: 0.75;
+}
+
+.bits-off .finger .bit {
+  display: none;
+}
+
+.meta {
+  margin-top: 12px;
+  color: #333;
+  line-height: 1.7;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(44px, 1fr));
+  gap: 8px;
+}
+
+.btn {
+  padding: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn.disabled,
+.btn:disabled {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.kanaBtn {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.kanaBtn .kana {
+  font-weight: 800;
+}
+
+.kanaBtn .num {
+  display: none;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.kanaBtn.active .num {
+  display: inline;
+}
+
+.details {
+  margin-top: 12px;
+}
+
+.details summary {
+  cursor: pointer;
+  user-select: none;
+  font-weight: 700;
+}
+
+.details[open] summary {
+  margin-bottom: 8px;
+}
