@@ -13,7 +13,7 @@ body {
   max-width: 920px;
 }
 
-.mainStage {
+.pose.mainStage {
   margin-top: 0;
   display: grid;
   justify-items: center;
@@ -28,9 +28,6 @@ body {
   line-height: 1;
 }
 
-.stageKana b {
-  color: #0d6efd;
-}
 
 .pose {
   display: flex;
