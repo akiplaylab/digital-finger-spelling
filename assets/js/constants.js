@@ -53,16 +53,16 @@ export const DATA = [
 ];
 
 export const FINGER_DEFS = [
-  { side: "左", label: "親", bit: 512, h: "mid" },
-  { side: "左", label: "人", bit: 256, h: "tall" },
-  { side: "左", label: "中", bit: 128, h: "tall" },
-  { side: "左", label: "薬", bit: 64, h: "tall" },
-  { side: "左", label: "小", bit: 32, h: "tall" },
-  { side: "右", label: "小", bit: 16, h: "tall" },
-  { side: "右", label: "薬", bit: 8, h: "tall" },
-  { side: "右", label: "中", bit: 4, h: "tall" },
-  { side: "右", label: "人", bit: 2, h: "tall" },
-  { side: "右", label: "親", bit: 1, h: "mid" },
+  { side: "左", label: "親", bit: 512 },
+  { side: "左", label: "人", bit: 256 },
+  { side: "左", label: "中", bit: 128 },
+  { side: "左", label: "薬", bit: 64 },
+  { side: "左", label: "小", bit: 32 },
+  { side: "右", label: "小", bit: 16 },
+  { side: "右", label: "薬", bit: 8 },
+  { side: "右", label: "中", bit: 4 },
+  { side: "右", label: "人", bit: 2 },
+  { side: "右", label: "親", bit: 1 },
 ];
 
 export const LEFT_HAND_FINGERS = FINGER_DEFS.filter(f => f.side === "左");

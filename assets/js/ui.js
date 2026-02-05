@@ -17,9 +17,6 @@ export const UI = {
 };
 
 const SPRITE_COLS = 8;
-const FRAME_W = 128;
-const FRAME_H = 128;
-
 let animationRunId = 0;
 
 
@@ -107,24 +104,6 @@ export function renderHand(container, fingers, bitsUp, { flipX = false } = {}) {
 
   setSpriteFrame(sprite, value);
   container.appendChild(sprite);
-}
-
-function drawHandFrame(ctx, image, value, { x, y = 0, flipX = false } = {}) {
-  const col = value % SPRITE_COLS;
-  const row = Math.floor(value / SPRITE_COLS);
-
-  const sx = col * FRAME_W;
-  const sy = row * FRAME_H;
-
-  ctx.save();
-  if (flipX) {
-    ctx.translate(x + FRAME_W, y);
-    ctx.scale(-1, 1);
-    ctx.drawImage(image, sx, sy, FRAME_W, FRAME_H, 0, 0, FRAME_W, FRAME_H);
-  } else {
-    ctx.drawImage(image, sx, sy, FRAME_W, FRAME_H, x, y, FRAME_W, FRAME_H);
-  }
-  ctx.restore();
 }
 
 export function updateMetadata(item) {
