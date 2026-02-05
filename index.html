@@ -12,13 +12,14 @@
   <h1>デジタル指話（50 音）</h1>
 
   <div class="card">
-    <div class="controls">
-      <select id="sel"></select>
-
-      <label class="toggle">
-        <input type="checkbox" id="showDetails" />
-        詳細表示
-      </label>
+    <div class="pose mainStage">
+      <div class="hand">
+        <div class="handBox">
+          <div class="fingers" id="leftFingers"></div>
+          <div class="fingers" id="rightFingers"></div>
+        </div>
+      </div>
+      <p class="stageKana" aria-live="polite"><span id="currentKana">あ</span></p>
     </div>
 
     <div class="sequenceTools">
@@ -40,20 +41,12 @@
       <div id="sequenceStatus" class="sequenceStatus"></div>
     </div>
 
-    <div class="pose">
-      <div class="hand">
-        <div class="handBox">
-          <div class="fingers" id="leftFingers"></div>
-          <div class="fingers" id="rightFingers"></div>
-        </div>
-      </div>
-    </div>
+    <div class="grid" id="grid"></div>
 
     <details class="details">
-      <summary>詳細</summary>
+      <summary>仕組みの詳細（知りたい人向け）</summary>
       <div class="meta" id="meta"></div>
     </details>
-    <div class="grid" id="grid"></div>
   </div>
 
   <script type="module" src="assets/js/app.js"></script>

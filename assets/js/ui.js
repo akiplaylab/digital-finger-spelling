@@ -2,7 +2,7 @@ import { $, toBinary } from './utils.js';
 import { DATA, FINGER_DEFS, LEFT_HAND_FINGERS, RIGHT_HAND_FINGERS, SPRITE_BIT_BY_LABEL } from './constants.js';
 
 export const UI = {
-  sel: null,
+  currentKana: null,
   meta: null,
   grid: null,
   leftFingers: null,
@@ -20,10 +20,6 @@ const FRAME_W = 128;
 const FRAME_H = 128;
 
 let animationRunId = 0;
-
-function buildOptionLabel(item, showDetails) {
-  return showDetails ? `${item.kana} (${item.id})` : `${item.kana}`;
-}
 
 function setStatus(message, isError = false) {
   UI.sequenceStatus.textContent = message;
@@ -128,11 +124,10 @@ export function setSelected(kana) {
   const item = DATA.find(x => x.kana === kana) ?? DATA.find(x => x.kana);
   if (!item) return;
 
-  UI.sel.value = item.kana;
-
   renderHand(UI.leftFingers, LEFT_HAND_FINGERS, item.id, { flipX: true });
   renderHand(UI.rightFingers, RIGHT_HAND_FINGERS, item.id);
 
+  UI.currentKana.textContent = item.kana;
   updateMetadata(item);
   updateGridSelection(item.kana);
 }
@@ -169,7 +164,7 @@ function stopSequence() {
 }
 
 export function initApp() {
-  UI.sel = $('sel');
+  UI.currentKana = $('currentKana');
   UI.meta = $('meta');
   UI.grid = $('grid');
   UI.leftFingers = $('leftFingers');
@@ -180,25 +175,6 @@ export function initApp() {
   UI.playSequenceBtn = $('playSequenceBtn');
   UI.stopSequenceBtn = $('stopSequenceBtn');
   UI.sequenceStatus = $('sequenceStatus');
-
-  const showDetails = $('showDetails');
-  const detailsEl = document.querySelector('details.details');
-
-  function renderSelectOptions() {
-    const selected = UI.sel.value;
-    UI.sel.innerHTML = DATA
-      .filter(x => x.kana)
-      .map(x => `<option value="${x.kana}">${buildOptionLabel(x, showDetails.checked)}</option>`)
-      .join('');
-    if (selected) UI.sel.value = selected;
-  }
-
-  renderSelectOptions();
-
-  UI.sel.addEventListener('change', e => {
-    stopSequence();
-    setSelected(e.target.value);
-  });
 
   UI.grid.innerHTML = DATA
     .map(x => {
@@ -218,17 +194,6 @@ export function initApp() {
       stopSequence();
       setSelected(b.dataset.kana);
     }
-  });
-
-  document.body.classList.add('details-off');
-  showDetails.addEventListener('change', e => {
-    const on = e.target.checked;
-    document.body.classList.toggle('details-on', on);
-    document.body.classList.toggle('details-off', !on);
-
-    if (detailsEl) detailsEl.open = on;
-
-    renderSelectOptions();
   });
 
   UI.stepMs.addEventListener('input', () => {
