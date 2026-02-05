@@ -12,20 +12,14 @@ export const UI = {
   stepMsValue: null,
   playSequenceBtn: null,
   stopSequenceBtn: null,
-  exportGifBtn: null,
   sequenceStatus: null,
 };
 
 const SPRITE_COLS = 8;
 const FRAME_W = 128;
 const FRAME_H = 128;
-const GIF_CANVAS_W = FRAME_W * 2;
-const GIF_CANVAS_H = FRAME_H;
-const SPRITE_URL = './assets/img/finger_binary_sprite_sheet.png';
-const GIF_PALETTE = [255, 255, 255, 0, 0, 0];
 
 let animationRunId = 0;
-let spriteImagePromise = null;
 
 function buildOptionLabel(item, showDetails) {
   return showDetails ? `${item.kana} (${item.id})` : `${item.kana}`;
@@ -111,170 +105,6 @@ function drawHandFrame(ctx, image, value, { x, y = 0, flipX = false } = {}) {
   ctx.restore();
 }
 
-function drawPoseFrame(ctx, image, bitsUp) {
-  ctx.clearRect(0, 0, GIF_CANVAS_W, GIF_CANVAS_H);
-
-  const leftValue = toHandValue(bitsUp, LEFT_HAND_FINGERS);
-  const rightValue = toHandValue(bitsUp, RIGHT_HAND_FINGERS);
-
-  drawHandFrame(ctx, image, leftValue, { x: 0, flipX: true });
-  drawHandFrame(ctx, image, rightValue, { x: FRAME_W });
-}
-
-function toBytesLE(value) {
-  return [value & 0xff, (value >> 8) & 0xff];
-}
-
-function makeGifSubBlocks(bytes) {
-  const out = [];
-  for (let i = 0; i < bytes.length; i += 255) {
-    const chunk = bytes.slice(i, i + 255);
-    out.push(chunk.length, ...chunk);
-  }
-  out.push(0x00);
-  return out;
-}
-
-function lzwEncode(indices, minCodeSize = 2) {
-  const clearCode = 1 << minCodeSize;
-  const endCode = clearCode + 1;
-
-  const outputBytes = [];
-  let bitBuffer = 0;
-  let bitCount = 0;
-
-  function writeCode(code, size) {
-    bitBuffer |= code << bitCount;
-    bitCount += size;
-
-    while (bitCount >= 8) {
-      outputBytes.push(bitBuffer & 0xff);
-      bitBuffer >>= 8;
-      bitCount -= 8;
-    }
-  }
-
-  function flushBits() {
-    if (bitCount > 0) {
-      outputBytes.push(bitBuffer & 0xff);
-      bitBuffer = 0;
-      bitCount = 0;
-    }
-  }
-
-  let dict = new Map();
-  let codeSize = minCodeSize + 1;
-  let nextCode = endCode + 1;
-
-  function resetDictionary() {
-    dict = new Map();
-    codeSize = minCodeSize + 1;
-    nextCode = endCode + 1;
-  }
-
-  function maybeGrowCodeSize() {
-    if (nextCode === (1 << codeSize) && codeSize < 12) {
-      codeSize += 1;
-    }
-  }
-
-  writeCode(clearCode, codeSize);
-  resetDictionary();
-
-  let prefix = String(indices[0]);
-
-  for (let i = 1; i < indices.length; i += 1) {
-    const k = indices[i];
-    const key = `${prefix},${k}`;
-
-    if (dict.has(key)) {
-      prefix = key;
-      continue;
-    }
-
-    const prefixCode = prefix.includes(',') ? dict.get(prefix) : Number(prefix);
-    writeCode(prefixCode, codeSize);
-
-    if (nextCode < 4096) {
-      dict.set(key, nextCode);
-      nextCode += 1;
-      maybeGrowCodeSize();
-    } else {
-      writeCode(clearCode, codeSize);
-      resetDictionary();
-    }
-
-    prefix = String(k);
-  }
-
-  const lastCode = prefix.includes(',') ? dict.get(prefix) : Number(prefix);
-  writeCode(lastCode, codeSize);
-  writeCode(endCode, codeSize);
-  flushBits();
-
-  return outputBytes;
-}
-
-function extractBinaryFrame(ctx) {
-  const { data } = ctx.getImageData(0, 0, GIF_CANVAS_W, GIF_CANVAS_H);
-  const indices = new Array(GIF_CANVAS_W * GIF_CANVAS_H);
-
-  for (let px = 0; px < indices.length; px += 1) {
-    const i = px * 4;
-    const alpha = data[i + 3];
-
-    if (alpha < 32) {
-      indices[px] = 0;
-      continue;
-    }
-
-    const brightness = data[i] + data[i + 1] + data[i + 2];
-    indices[px] = brightness < 380 ? 1 : 0;
-  }
-
-  return indices;
-}
-
-function encodeAnimatedGif(frameIndicesList, delayMs) {
-  const delayCentiseconds = Math.max(1, Math.round(delayMs / 10));
-  const bytes = [];
-
-  bytes.push(...new TextEncoder().encode('GIF89a'));
-  bytes.push(...toBytesLE(GIF_CANVAS_W), ...toBytesLE(GIF_CANVAS_H));
-  bytes.push(0xf0, 0x00, 0x00);
-  bytes.push(...GIF_PALETTE);
-
-  bytes.push(
-    0x21, 0xff, 0x0b,
-    ...new TextEncoder().encode('NETSCAPE2.0'),
-    0x03, 0x01, 0x00, 0x00, 0x00,
-  );
-
-  for (const indices of frameIndicesList) {
-    const imageData = lzwEncode(indices, 2);
-
-    bytes.push(0x21, 0xf9, 0x04, 0x00, ...toBytesLE(delayCentiseconds), 0x00, 0x00);
-    bytes.push(0x2c, 0x00, 0x00, 0x00, 0x00, ...toBytesLE(GIF_CANVAS_W), ...toBytesLE(GIF_CANVAS_H), 0x00);
-    bytes.push(0x02, ...makeGifSubBlocks(imageData));
-  }
-
-  bytes.push(0x3b);
-  return new Blob([new Uint8Array(bytes)], { type: 'image/gif' });
-}
-
-function getSpriteImage() {
-  if (spriteImagePromise) return spriteImagePromise;
-
-  spriteImagePromise = new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error('スプライト画像の読み込みに失敗しました。'));
-    image.src = SPRITE_URL;
-  });
-
-  return spriteImagePromise;
-}
-
 export function updateMetadata(item) {
   const n = item.id;
   const bin = toBinary(n);
@@ -338,51 +168,6 @@ function stopSequence() {
   setStatus('再生を停止しました。');
 }
 
-async function exportGif() {
-  const { items, unknown } = normalizeInputToItems(UI.phraseInput.value);
-
-  if (!items.length) {
-    setStatus('GIF 化できる文字がありません。', true);
-    return;
-  }
-
-  UI.exportGifBtn.disabled = true;
-  setStatus('GIF を生成しています...');
-
-  try {
-    const image = await getSpriteImage();
-    const canvas = document.createElement('canvas');
-    canvas.width = GIF_CANVAS_W;
-    canvas.height = GIF_CANVAS_H;
-    const ctx = canvas.getContext('2d');
-
-    const stepMs = Number(UI.stepMs.value);
-    const frameIndicesList = [];
-
-    for (const item of items) {
-      drawPoseFrame(ctx, image, item.id);
-      frameIndicesList.push(extractBinaryFrame(ctx));
-    }
-
-    const blob = encodeAnimatedGif(frameIndicesList, stepMs);
-    const nameText = items.map(x => x.kana).join('') || 'sequence';
-    const safeName = nameText.replace(/[^ぁ-んァ-ンーa-zA-Z0-9_-]/g, '_');
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${safeName || 'sequence'}.gif`;
-    a.click();
-
-    URL.revokeObjectURL(url);
-    UI.exportGifBtn.disabled = false;
-    setStatus(`GIF を保存しました。${unknown.length ? ` 未対応: ${unknown.join('')}` : ''}`);
-  } catch (err) {
-    UI.exportGifBtn.disabled = false;
-    setStatus(err.message || 'GIF 生成中にエラーが発生しました。', true);
-  }
-}
-
 export function initApp() {
   UI.sel = $('sel');
   UI.meta = $('meta');
@@ -394,7 +179,6 @@ export function initApp() {
   UI.stepMsValue = $('stepMsValue');
   UI.playSequenceBtn = $('playSequenceBtn');
   UI.stopSequenceBtn = $('stopSequenceBtn');
-  UI.exportGifBtn = $('exportGifBtn');
   UI.sequenceStatus = $('sequenceStatus');
 
   const showDetails = $('showDetails');
@@ -453,8 +237,7 @@ export function initApp() {
 
   UI.playSequenceBtn.addEventListener('click', playSequence);
   UI.stopSequenceBtn.addEventListener('click', stopSequence);
-  UI.exportGifBtn.addEventListener('click', exportGif);
 
   setSelected('あ');
-  setStatus('文字列を入力して「再生」または「GIF を作成」を押してください。');
+  setStatus('文字列を入力して「再生」を押してください。');
 }
