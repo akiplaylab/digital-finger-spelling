@@ -13,6 +13,7 @@ export const UI = {
   playSequenceBtn: null,
   stopSequenceBtn: null,
   sequenceStatus: null,
+  themeToggleBtn: null,
 };
 
 const SPRITE_COLS = 8;
@@ -20,6 +21,31 @@ const FRAME_W = 128;
 const FRAME_H = 128;
 
 let animationRunId = 0;
+
+
+const THEME_STORAGE_KEY = 'dfs-theme';
+
+function getPreferredTheme() {
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  if (saved === 'light' || saved === 'dark') return saved;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function setTheme(theme) {
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  localStorage.setItem(THEME_STORAGE_KEY, theme);
+
+  const isDark = theme === 'dark';
+  UI.themeToggleBtn.textContent = isDark ? '☀️ ライトモード' : '🌙 ダークモード';
+  UI.themeToggleBtn.setAttribute('aria-pressed', String(isDark));
+}
+
+function toggleTheme() {
+  const current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  setTheme(current === 'dark' ? 'light' : 'dark');
+}
+
 
 function setStatus(message, isError = false) {
   UI.sequenceStatus.textContent = message;
@@ -175,6 +201,7 @@ export function initApp() {
   UI.playSequenceBtn = $('playSequenceBtn');
   UI.stopSequenceBtn = $('stopSequenceBtn');
   UI.sequenceStatus = $('sequenceStatus');
+  UI.themeToggleBtn = $('themeToggleBtn');
 
   UI.grid.innerHTML = DATA
     .map(x => {
@@ -202,7 +229,9 @@ export function initApp() {
 
   UI.playSequenceBtn.addEventListener('click', playSequence);
   UI.stopSequenceBtn.addEventListener('click', stopSequence);
+  UI.themeToggleBtn.addEventListener('click', toggleTheme);
 
+  setTheme(getPreferredTheme());
   setSelected('あ');
   setStatus('文字列を入力して「再生」を押してください。');
 }
