@@ -17,7 +17,7 @@ Digital Finger Spelling（デジタル指話）は、日本語の 50 音を二�
 
 ## Status
 
-🚧 Work in progress  
+🚧 Work in progress
 This repository currently contains an experimental web-based visualizer.
 
 ## License
