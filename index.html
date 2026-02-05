@@ -252,21 +252,21 @@
       { id: 51, kana: "ん" }
     ];
 
-    const leftHandFingers = [
-      { label: "親", bit: 512, h: "mid" },
-      { label: "人", bit: 256, h: "tall" },
-      { label: "中", bit: 128, h: "tall" },
-      { label: "薬", bit: 64, h: "tall" },
-      { label: "小", bit: 32, h: "tall" },
+    const FINGER_DEFS = [
+      { side: "左", label: "親", bit: 512, h: "mid" },
+      { side: "左", label: "人", bit: 256, h: "tall" },
+      { side: "左", label: "中", bit: 128, h: "tall" },
+      { side: "左", label: "薬", bit: 64, h: "tall" },
+      { side: "左", label: "小", bit: 32, h: "tall" },
+      { side: "右", label: "小", bit: 16, h: "tall" },
+      { side: "右", label: "薬", bit: 8, h: "tall" },
+      { side: "右", label: "中", bit: 4, h: "tall" },
+      { side: "右", label: "人", bit: 2, h: "tall" },
+      { side: "右", label: "親", bit: 1, h: "mid" },
     ];
 
-    const rightHandFingers = [
-      { label: "小", bit: 16, h: "tall" },
-      { label: "薬", bit: 8, h: "tall" },
-      { label: "中", bit: 4, h: "tall" },
-      { label: "人", bit: 2, h: "tall" },
-      { label: "親", bit: 1, h: "mid" },
-    ];
+    const leftHandFingers = FINGER_DEFS.filter(f => f.side === "左");
+    const rightHandFingers = FINGER_DEFS.filter(f => f.side === "右");
 
     const $ = (id) => document.getElementById(id);
 
@@ -278,7 +278,7 @@
       container.innerHTML = "";
       for (const f of fingers) {
         const d = document.createElement("div");
-        d.className = `finger ${f.h} ${bitsUp.has(f.bit) ? "up" : ""}`;
+        d.className = `finger ${f.h} ${(bitsUp & f.bit) ? "up" : ""}`;
 
         const label = document.createElement("div");
         label.className = "label";
@@ -298,45 +298,36 @@
       document.body.classList.toggle("bits-off", !e.target.checked);
     });
 
+    function updateMetadata(item) {
+      const n = item.id;
+      const bin = toBinary(n);
+      const upFingers = FINGER_DEFS
+        .filter(f => n & f.bit)
+        .map(f => `${f.side}${f.label}指 (${f.bit})`);
+
+      $("meta").innerHTML =
+        `選択 : <b>${item.kana}</b> (${n})<br/>` +
+        `2 進数 : <span class="mono">${bin}</span><br/>` +
+        `上げる指 : ${upFingers.length ? upFingers.join(" / ") : "なし"}`;
+    }
+
+    function updateGridSelection(kana) {
+      document.querySelectorAll(".btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.kana === kana);
+      });
+    }
+
     function setSelected(kana) {
       const item = data.find(x => x.kana === kana) ?? data.find(x => x.kana);
       if (!item) return;
 
       $("sel").value = item.kana;
 
-      const n = item.id;
-      const bin = toBinary(n);
+      renderHand($("leftFingers"), leftHandFingers, item.id);
+      renderHand($("rightFingers"), rightHandFingers, item.id);
 
-      const up = new Set();
-      [1, 2, 4, 8, 16].forEach(b => { if (n & b) up.add(b); });
-      [32, 64, 128, 256, 512].forEach(b => { if (n & b) up.add(b); });
-
-      renderHand($("leftFingers"), leftHandFingers, up);
-      renderHand($("rightFingers"), rightHandFingers, up);
-
-      const upList = [];
-      const pushIf = (cond, s) => { if (cond) upList.push(s); };
-
-      pushIf(n & 512, "左親指 (512)");
-      pushIf(n & 256, "左人差し指 (256)");
-      pushIf(n & 128, "左中指 (128)");
-      pushIf(n & 64, "左薬指 (64)");
-      pushIf(n & 32, "左小指 (32)");
-
-      pushIf(n & 16, "右小指 (16)");
-      pushIf(n & 8, "右薬指 (8)");
-      pushIf(n & 4, "右中指 (4)");
-      pushIf(n & 2, "右人差し指 (2)");
-      pushIf(n & 1, "右親指 (1)");
-
-      $("meta").innerHTML =
-        `選択 : <b>${item.kana}</b> (${n})<br/>` +
-        `2 進数 : <span class="mono">${bin}</span><br/>` +
-        `上げる指 : ${upList.length ? upList.join(" / ") : "なし"}`;
-
-      document.querySelectorAll(".btn").forEach(b => {
-        b.classList.toggle("active", b.dataset.kana === item.kana);
-      });
+      updateMetadata(item);
+      updateGridSelection(item.kana);
     }
 
     function init() {
@@ -349,22 +340,19 @@
 
       $("grid").innerHTML = data
         .map(x => {
-          if (!x.kana) {
-            return `<button class="btn disabled" disabled></button>`;
-          }
+          if (!x.kana) return `<button class="btn disabled" disabled></button>`;
           return `
-      <button class="btn kanaBtn" data-kana="${x.kana}">
-        <div class="kana">${x.kana}</div>
-        <div class="num">(${x.id})</div>
-      </button>
-    `;
+            <button class="btn kanaBtn" data-kana="${x.kana}">
+              <div class="kana">${x.kana}</div>
+              <div class="num">(${x.id})</div>
+            </button>
+          `;
         })
         .join("");
 
       $("grid").addEventListener("click", e => {
         const b = e.target.closest(".btn");
-        if (!b) return;
-        setSelected(b.dataset.kana);
+        if (b) setSelected(b.dataset.kana);
       });
 
       setSelected("あ");
