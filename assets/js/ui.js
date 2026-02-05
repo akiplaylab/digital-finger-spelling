@@ -22,6 +22,7 @@ const FRAME_H = 128;
 const GIF_CANVAS_W = FRAME_W * 2;
 const GIF_CANVAS_H = FRAME_H;
 const SPRITE_URL = './assets/img/finger_binary_sprite_sheet.png';
+const GIF_PALETTE = [255, 255, 255, 0, 0, 0];
 
 let animationRunId = 0;
 let spriteImagePromise = null;
@@ -120,6 +121,147 @@ function drawPoseFrame(ctx, image, bitsUp) {
   drawHandFrame(ctx, image, rightValue, { x: FRAME_W });
 }
 
+function toBytesLE(value) {
+  return [value & 0xff, (value >> 8) & 0xff];
+}
+
+function makeGifSubBlocks(bytes) {
+  const out = [];
+  for (let i = 0; i < bytes.length; i += 255) {
+    const chunk = bytes.slice(i, i + 255);
+    out.push(chunk.length, ...chunk);
+  }
+  out.push(0x00);
+  return out;
+}
+
+function lzwEncode(indices, minCodeSize = 2) {
+  const clearCode = 1 << minCodeSize;
+  const endCode = clearCode + 1;
+
+  const outputBytes = [];
+  let bitBuffer = 0;
+  let bitCount = 0;
+
+  function writeCode(code, size) {
+    bitBuffer |= code << bitCount;
+    bitCount += size;
+
+    while (bitCount >= 8) {
+      outputBytes.push(bitBuffer & 0xff);
+      bitBuffer >>= 8;
+      bitCount -= 8;
+    }
+  }
+
+  function flushBits() {
+    if (bitCount > 0) {
+      outputBytes.push(bitBuffer & 0xff);
+      bitBuffer = 0;
+      bitCount = 0;
+    }
+  }
+
+  let dict = new Map();
+  let codeSize = minCodeSize + 1;
+  let nextCode = endCode + 1;
+
+  function resetDictionary() {
+    dict = new Map();
+    codeSize = minCodeSize + 1;
+    nextCode = endCode + 1;
+  }
+
+  function maybeGrowCodeSize() {
+    if (nextCode === (1 << codeSize) && codeSize < 12) {
+      codeSize += 1;
+    }
+  }
+
+  writeCode(clearCode, codeSize);
+  resetDictionary();
+
+  let prefix = String(indices[0]);
+
+  for (let i = 1; i < indices.length; i += 1) {
+    const k = indices[i];
+    const key = `${prefix},${k}`;
+
+    if (dict.has(key)) {
+      prefix = key;
+      continue;
+    }
+
+    const prefixCode = prefix.includes(',') ? dict.get(prefix) : Number(prefix);
+    writeCode(prefixCode, codeSize);
+
+    if (nextCode < 4096) {
+      dict.set(key, nextCode);
+      nextCode += 1;
+      maybeGrowCodeSize();
+    } else {
+      writeCode(clearCode, codeSize);
+      resetDictionary();
+    }
+
+    prefix = String(k);
+  }
+
+  const lastCode = prefix.includes(',') ? dict.get(prefix) : Number(prefix);
+  writeCode(lastCode, codeSize);
+  writeCode(endCode, codeSize);
+  flushBits();
+
+  return outputBytes;
+}
+
+function extractBinaryFrame(ctx) {
+  const { data } = ctx.getImageData(0, 0, GIF_CANVAS_W, GIF_CANVAS_H);
+  const indices = new Array(GIF_CANVAS_W * GIF_CANVAS_H);
+
+  for (let px = 0; px < indices.length; px += 1) {
+    const i = px * 4;
+    const alpha = data[i + 3];
+
+    if (alpha < 32) {
+      indices[px] = 0;
+      continue;
+    }
+
+    const brightness = data[i] + data[i + 1] + data[i + 2];
+    indices[px] = brightness < 380 ? 1 : 0;
+  }
+
+  return indices;
+}
+
+function encodeAnimatedGif(frameIndicesList, delayMs) {
+  const delayCentiseconds = Math.max(1, Math.round(delayMs / 10));
+  const bytes = [];
+
+  bytes.push(...new TextEncoder().encode('GIF89a'));
+  bytes.push(...toBytesLE(GIF_CANVAS_W), ...toBytesLE(GIF_CANVAS_H));
+  bytes.push(0xf0, 0x00, 0x00);
+  bytes.push(...GIF_PALETTE);
+
+  bytes.push(
+    0x21, 0xff, 0x0b,
+    ...new TextEncoder().encode('NETSCAPE2.0'),
+    0x03, 0x01, 0x00, 0x00, 0x00,
+  );
+
+  for (const indices of frameIndicesList) {
+    const imageData = lzwEncode(indices, 2);
+
+    bytes.push(0x21, 0xf9, 0x04, 0x00, ...toBytesLE(delayCentiseconds), 0x00, 0x00);
+    bytes.push(0x2c, 0x00, 0x00, 0x00, 0x00, ...toBytesLE(GIF_CANVAS_W), ...toBytesLE(GIF_CANVAS_H), 0x00);
+    bytes.push(0x02, ...makeGifSubBlocks(imageData));
+  }
+
+  bytes.push(0x3b);
+  return new Blob([new Uint8Array(bytes)], { type: 'image/gif' });
+}
+
 function getSpriteImage() {
   if (spriteImagePromise) return spriteImagePromise;
 
@@ -204,11 +346,6 @@ async function exportGif() {
     return;
   }
 
-  if (typeof GIF === 'undefined') {
-    setStatus('GIF ライブラリを読み込めませんでした。ネットワーク接続を確認してください。', true);
-    return;
-  }
-
   UI.exportGifBtn.disabled = true;
   setStatus('GIF を生成しています...');
 
@@ -219,42 +356,27 @@ async function exportGif() {
     canvas.height = GIF_CANVAS_H;
     const ctx = canvas.getContext('2d');
 
-    const gif = new GIF({
-      workers: 2,
-      quality: 1,
-      width: GIF_CANVAS_W,
-      height: GIF_CANVAS_H,
-      workerScript: 'https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.worker.js',
-    });
-
     const stepMs = Number(UI.stepMs.value);
+    const frameIndicesList = [];
 
     for (const item of items) {
       drawPoseFrame(ctx, image, item.id);
-      gif.addFrame(ctx, { copy: true, delay: stepMs });
+      frameIndicesList.push(extractBinaryFrame(ctx));
     }
 
-    gif.on('finished', blob => {
-      const nameText = items.map(x => x.kana).join('') || 'sequence';
-      const safeName = nameText.replace(/[^ぁ-んァ-ンーa-zA-Z0-9_-]/g, '_');
-      const url = URL.createObjectURL(blob);
+    const blob = encodeAnimatedGif(frameIndicesList, stepMs);
+    const nameText = items.map(x => x.kana).join('') || 'sequence';
+    const safeName = nameText.replace(/[^ぁ-んァ-ンーa-zA-Z0-9_-]/g, '_');
+    const url = URL.createObjectURL(blob);
 
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${safeName || 'sequence'}.gif`;
-      a.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${safeName || 'sequence'}.gif`;
+    a.click();
 
-      URL.revokeObjectURL(url);
-      UI.exportGifBtn.disabled = false;
-      setStatus(`GIF を保存しました。${unknown.length ? ` 未対応: ${unknown.join('')}` : ''}`);
-    });
-
-    gif.on('abort', () => {
-      UI.exportGifBtn.disabled = false;
-      setStatus('GIF 生成が中断されました。', true);
-    });
-
-    gif.render();
+    URL.revokeObjectURL(url);
+    UI.exportGifBtn.disabled = false;
+    setStatus(`GIF を保存しました。${unknown.length ? ` 未対応: ${unknown.join('')}` : ''}`);
   } catch (err) {
     UI.exportGifBtn.disabled = false;
     setStatus(err.message || 'GIF 生成中にエラーが発生しました。', true);
