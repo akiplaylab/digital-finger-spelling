@@ -21,6 +21,25 @@
       </label>
     </div>
 
+    <div class="sequenceTools">
+      <label class="field">
+        <span>文字列（例: こんにちは）</span>
+        <input id="phraseInput" type="text" value="こんにちは" />
+      </label>
+
+      <label class="field speedField">
+        <span>1 文字の表示時間: <b id="stepMsValue">600ms</b></span>
+        <input id="stepMs" type="range" min="200" max="1500" step="100" value="600" />
+      </label>
+
+      <div class="sequenceActions">
+        <button type="button" id="playSequenceBtn">再生</button>
+        <button type="button" id="stopSequenceBtn">停止</button>
+      </div>
+
+      <div id="sequenceStatus" class="sequenceStatus"></div>
+    </div>
+
     <div class="pose">
       <div class="hand">
         <div class="handBox">
