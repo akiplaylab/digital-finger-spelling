@@ -270,6 +270,14 @@
 
     const $ = (id) => document.getElementById(id);
 
+    const UI = {
+      sel: null,
+      meta: null,
+      grid: null,
+      leftFingers: null,
+      rightFingers: null,
+    };
+
     function toBinary(n) {
       return n.toString(2).padStart(10, "0");
     }
@@ -305,14 +313,14 @@
         .filter(f => n & f.bit)
         .map(f => `${f.side}${f.label}指 (${f.bit})`);
 
-      $("meta").innerHTML =
+      UI.meta.innerHTML =
         `選択 : <b>${item.kana}</b> (${n})<br/>` +
         `2 進数 : <span class="mono">${bin}</span><br/>` +
         `上げる指 : ${upFingers.length ? upFingers.join(" / ") : "なし"}`;
     }
 
     function updateGridSelection(kana) {
-      document.querySelectorAll(".btn").forEach(b => {
+      UI.grid.querySelectorAll(".btn").forEach(b => {
         b.classList.toggle("active", b.dataset.kana === kana);
       });
     }
@@ -321,24 +329,30 @@
       const item = data.find(x => x.kana === kana) ?? data.find(x => x.kana);
       if (!item) return;
 
-      $("sel").value = item.kana;
+      UI.sel.value = item.kana;
 
-      renderHand($("leftFingers"), leftHandFingers, item.id);
-      renderHand($("rightFingers"), rightHandFingers, item.id);
+      renderHand(UI.leftFingers, leftHandFingers, item.id);
+      renderHand(UI.rightFingers, rightHandFingers, item.id);
 
       updateMetadata(item);
       updateGridSelection(item.kana);
     }
 
     function init() {
-      $("sel").innerHTML = data
+      UI.sel = $("sel");
+      UI.meta = $("meta");
+      UI.grid = $("grid");
+      UI.leftFingers = $("leftFingers");
+      UI.rightFingers = $("rightFingers");
+
+      UI.sel.innerHTML = data
         .filter(x => x.kana)
         .map(x => `<option value="${x.kana}">${x.kana} (${x.id})</option>`)
         .join("");
 
-      $("sel").addEventListener("change", e => setSelected(e.target.value));
+      UI.sel.addEventListener("change", e => setSelected(e.target.value));
 
-      $("grid").innerHTML = data
+      UI.grid.innerHTML = data
         .map(x => {
           if (!x.kana) return `<button class="btn disabled" disabled></button>`;
           return `
@@ -350,7 +364,7 @@
         })
         .join("");
 
-      $("grid").addEventListener("click", e => {
+      UI.grid.addEventListener("click", e => {
         const b = e.target.closest(".btn");
         if (b) setSelected(b.dataset.kana);
       });
