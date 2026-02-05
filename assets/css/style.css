@@ -20,14 +20,15 @@ body {
   gap: 12px;
 }
 
-.stageLead {
-  margin: 0;
-  font-size: clamp(24px, 5vw, 40px);
+.stageKana {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: clamp(36px, 9vw, 56px);
   font-weight: 800;
-  letter-spacing: 0.02em;
+  line-height: 1;
 }
 
-.stageLead b {
+.stageKana b {
   color: #0d6efd;
 }
 
