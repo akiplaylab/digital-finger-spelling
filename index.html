@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>デジタル指話（50 音）</title>
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
+    }
+
+    body {
+      margin: 24px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .toggle {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    @media (max-width: 720px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    select {
+      padding: 10px 12px;
+      font-size: 16px;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 16px;
+      max-width: 920px;
+    }
+
+    .pose {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      margin-top: 12px;
+    }
+
+    .hand {
+      width: 420px;
+    }
+
+    .handTitle {
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+
+    .handBox {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .fingers {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: flex-end;
+      height: 160px;
+    }
+
+    .finger {
+      width: 56px;
+      border-radius: 10px;
+      border: 1px solid #bbb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      user-select: none;
+      background: #f3f3f3;
+      color: #777;
+    }
+
+    .up {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+
+    .finger.small {
+      height: 95px;
+    }
+
+    .finger.mid {
+      height: 125px;
+    }
+
+    .finger.tall {
+      height: 150px;
+    }
+
+    .meta {
+      margin-top: 12px;
+      color: #333;
+      line-height: 1.7;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .hint {
+      color: #666;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(44px, 1fr));
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 10px 0;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn.active {
+      border-color: #111;
+      background: #111;
+      color: #fff;
+    }
+
+    .finger {
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px 0;
+    }
+
+    .finger .label {
+      font-weight: 800;
+    }
+
+    .finger .bit {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .finger.up .bit {
+      opacity: 0.75;
+    }
+
+    .bits-off .finger .bit {
+      display: none;
+    }
+
+    .btn.disabled,
+    .btn:disabled {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .kanaBtn {
+      display: flex;
+      flex-direction: row;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 0;
+    }
+
+    .kanaBtn .kana {
+      font-weight: 800;
+    }
+
+    .kanaBtn .num {
+      display: none;
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .kanaBtn.active .num {
+      display: inline;
+    }
+
+    .details {
+      margin-top: 12px;
+    }
+
+    .details summary {
+      cursor: pointer;
+      user-select: none;
+      font-weight: 700;
+    }
+
+    .details[open] summary {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>デジタル指話（50 音）</h1>
+
+  <div class="card">
+    <div class="controls">
+      <select id="sel"></select>
+
+      <label class="toggle">
+        <input type="checkbox" id="showBits" checked />
+        ビット表示
+      </label>
+    </div>
+
+    <div class="pose">
+      <div class="hand">
+        <div class="handTitle">左手</div>
+        <div class="handBox">
+          <div class="fingers" id="leftFingers"></div>
+        </div>
+      </div>
+
+      <div class="hand">
+        <div class="handTitle">右手</div>
+        <div class="handBox">
+          <div class="fingers" id="rightFingers"></div>
+        </div>
+      </div>
+    </div>
+
+    <details class="details">
+      <summary>詳細</summary>
+      <div class="meta" id="meta"></div>
+    </details>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <script>
+    const data = [
+      { id: 1, kana: "あ" }, { id: 2, kana: "い" }, { id: 3, kana: "う" }, { id: 4, kana: "え" }, { id: 5, kana: "お" },
+      { id: 6, kana: "か" }, { id: 7, kana: "き" }, { id: 8, kana: "く" }, { id: 9, kana: "け" }, { id: 10, kana: "こ" },
+      { id: 11, kana: "さ" }, { id: 12, kana: "し" }, { id: 13, kana: "す" }, { id: 14, kana: "せ" }, { id: 15, kana: "そ" },
+      { id: 16, kana: "た" }, { id: 17, kana: "ち" }, { id: 18, kana: "つ" }, { id: 19, kana: "て" }, { id: 20, kana: "と" },
+      { id: 21, kana: "な" }, { id: 22, kana: "に" }, { id: 23, kana: "ぬ" }, { id: 24, kana: "ね" }, { id: 25, kana: "の" },
+      { id: 26, kana: "は" }, { id: 27, kana: "ひ" }, { id: 28, kana: "ふ" }, { id: 29, kana: "へ" }, { id: 30, kana: "ほ" },
+      { id: 31, kana: "ま" }, { id: 32, kana: "み" }, { id: 33, kana: "む" }, { id: 34, kana: "め" }, { id: 35, kana: "も" },
+      { id: 36, kana: "や" }, { id: 37, kana: "" }, { id: 38, kana: "ゆ" }, { id: 39, kana: "" }, { id: 40, kana: "よ" },
+      { id: 41, kana: "ら" }, { id: 42, kana: "り" }, { id: 43, kana: "る" }, { id: 44, kana: "れ" }, { id: 45, kana: "ろ" },
+      { id: 46, kana: "わ" }, { id: 47, kana: "" }, { id: 48, kana: "" }, { id: 49, kana: "" }, { id: 50, kana: "を" },
+      { id: 51, kana: "ん" }
+    ];
+
+    const leftHandFingers = [
+      { label: "親", bit: 512, h: "mid" },
+      { label: "人", bit: 256, h: "tall" },
+      { label: "中", bit: 128, h: "tall" },
+      { label: "薬", bit: 64, h: "tall" },
+      { label: "小", bit: 32, h: "tall" },
+    ];
+
+    const rightHandFingers = [
+      { label: "小", bit: 16, h: "tall" },
+      { label: "薬", bit: 8, h: "tall" },
+      { label: "中", bit: 4, h: "tall" },
+      { label: "人", bit: 2, h: "tall" },
+      { label: "親", bit: 1, h: "mid" },
+    ];
+
+    const $ = (id) => document.getElementById(id);
+
+    function toBinary(n) {
+      return n.toString(2).padStart(10, "0");
+    }
+
+    function renderHand(container, fingers, bitsUp) {
+      container.innerHTML = "";
+      for (const f of fingers) {
+        const d = document.createElement("div");
+        d.className = `finger ${f.h} ${bitsUp.has(f.bit) ? "up" : ""}`;
+
+        const label = document.createElement("div");
+        label.className = "label";
+        label.textContent = f.label;
+
+        const bit = document.createElement("div");
+        bit.className = "bit";
+        bit.textContent = `(${f.bit})`;
+
+        d.appendChild(label);
+        d.appendChild(bit);
+        container.appendChild(d);
+      }
+    }
+
+    $("showBits").addEventListener("change", (e) => {
+      document.body.classList.toggle("bits-off", !e.target.checked);
+    });
+
+    function setSelected(kana) {
+      const item = data.find(x => x.kana === kana) ?? data.find(x => x.kana);
+      if (!item) return;
+
+      $("sel").value = item.kana;
+
+      const n = item.id;
+      const bin = toBinary(n);
+
+      const up = new Set();
+      [1, 2, 4, 8, 16].forEach(b => { if (n & b) up.add(b); });
+      [32, 64, 128, 256, 512].forEach(b => { if (n & b) up.add(b); });
+
+      renderHand($("leftFingers"), leftHandFingers, up);
+      renderHand($("rightFingers"), rightHandFingers, up);
+
+      const upList = [];
+      const pushIf = (cond, s) => { if (cond) upList.push(s); };
+
+      pushIf(n & 512, "左親指 (512)");
+      pushIf(n & 256, "左人差し指 (256)");
+      pushIf(n & 128, "左中指 (128)");
+      pushIf(n & 64, "左薬指 (64)");
+      pushIf(n & 32, "左小指 (32)");
+
+      pushIf(n & 16, "右小指 (16)");
+      pushIf(n & 8, "右薬指 (8)");
+      pushIf(n & 4, "右中指 (4)");
+      pushIf(n & 2, "右人差し指 (2)");
+      pushIf(n & 1, "右親指 (1)");
+
+      $("meta").innerHTML =
+        `選択 : <b>${item.kana}</b> (${n})<br/>` +
+        `2 進数 : <span class="mono">${bin}</span><br/>` +
+        `上げる指 : ${upList.length ? upList.join(" / ") : "なし"}`;
+
+      document.querySelectorAll(".btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.kana === item.kana);
+      });
+    }
+
+    function init() {
+      $("sel").innerHTML = data
+        .filter(x => x.kana)
+        .map(x => `<option value="${x.kana}">${x.kana} (${x.id})</option>`)
+        .join("");
+
+      $("sel").addEventListener("change", e => setSelected(e.target.value));
+
+      $("grid").innerHTML = data
+        .map(x => {
+          if (!x.kana) {
+            return `<button class="btn disabled" disabled></button>`;
+          }
+          return `
+      <button class="btn kanaBtn" data-kana="${x.kana}">
+        <div class="kana">${x.kana}</div>
+        <div class="num">(${x.id})</div>
+      </button>
+    `;
+        })
+        .join("");
+
+      $("grid").addEventListener("click", e => {
+        const b = e.target.closest(".btn");
+        if (!b) return;
+        setSelected(b.dataset.kana);
+      });
+
+      setSelected("あ");
+    }
+    init();
+  </script>
+</body>
+
+</html>
