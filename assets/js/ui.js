@@ -11,6 +11,11 @@ export const UI = {
 
 const SPRITE_COLS = 8;
 
+function buildOptionLabel(item, showDetails) {
+  return showDetails ? `${item.kana} (${item.id})` : `${item.kana}`;
+}
+
+
 function toHandValue(bitsUp, fingers) {
   let v = 0;
 
@@ -86,10 +91,19 @@ export function initApp() {
   UI.leftFingers = $("leftFingers");
   UI.rightFingers = $("rightFingers");
 
-  UI.sel.innerHTML = DATA
-    .filter(x => x.kana)
-    .map(x => `<option value="${x.kana}">${x.kana} (${x.id})</option>`)
-    .join("");
+  const showDetails = $("showDetails");
+  const detailsEl = document.querySelector("details.details");
+
+  function renderSelectOptions() {
+    const selected = UI.sel.value;
+    UI.sel.innerHTML = DATA
+      .filter(x => x.kana)
+      .map(x => `<option value="${x.kana}">${buildOptionLabel(x, showDetails.checked)}</option>`)
+      .join("");
+    if (selected) UI.sel.value = selected;
+  }
+
+  renderSelectOptions();
 
   UI.sel.addEventListener("change", e => setSelected(e.target.value));
 
@@ -110,8 +124,15 @@ export function initApp() {
     if (b) setSelected(b.dataset.kana);
   });
 
-  $("showBits").addEventListener("change", (e) => {
-    document.body.classList.toggle("bits-off", !e.target.checked);
+  document.body.classList.add("details-off");
+  showDetails.addEventListener("change", (e) => {
+    const on = e.target.checked;
+    document.body.classList.toggle("details-on", on);
+    document.body.classList.toggle("details-off", !on);
+
+    if (detailsEl) detailsEl.open = on;
+
+    renderSelectOptions();
   });
 
   setSelected("あ");
