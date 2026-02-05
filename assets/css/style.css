@@ -6,37 +6,29 @@ body {
   margin: 24px;
 }
 
-.controls {
-  display: grid;
-  grid-template-columns: auto auto;
-  gap: 16px;
-  align-items: center;
-}
-
-.toggle {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  white-space: nowrap;
-  user-select: none;
-}
-
-@media (max-width: 720px) {
-  .controls {
-    grid-template-columns: 1fr;
-  }
-}
-
-select {
-  padding: 10px 12px;
-  font-size: 16px;
-}
-
 .card {
   border: 1px solid #ddd;
   border-radius: 12px;
   padding: 16px;
   max-width: 920px;
+}
+
+.mainStage {
+  margin-top: 0;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+.stageLead {
+  margin: 0;
+  font-size: clamp(24px, 5vw, 40px);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.stageLead b {
+  color: #0d6efd;
 }
 
 .pose {
@@ -51,15 +43,13 @@ select {
   width: 420px;
 }
 
-.handTitle {
-  font-weight: 700;
-  margin: 0 0 8px;
-}
-
 .handBox {
   border: 1px solid #ddd;
   border-radius: 12px;
   padding: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .fingers {
@@ -68,58 +58,6 @@ select {
   justify-content: center;
   align-items: flex-end;
   height: 160px;
-}
-
-.finger {
-  width: 56px;
-  border-radius: 10px;
-  border: 1px solid #bbb;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 0;
-  font-weight: 700;
-  user-select: none;
-  background: #f3f3f3;
-  color: #777;
-}
-
-.up,
-.btn.active {
-  background: #111;
-  color: #fff;
-  border-color: #111;
-}
-
-.finger.small {
-  height: 95px;
-}
-
-.finger.mid {
-  height: 125px;
-}
-
-.finger.tall {
-  height: 150px;
-}
-
-.finger .label {
-  font-weight: 800;
-}
-
-.finger .bit {
-  font-size: 12px;
-  opacity: 0.9;
-}
-
-.finger.up .bit {
-  opacity: 0.75;
-}
-
-.bits-off .finger .bit {
-  display: none;
 }
 
 .meta {
@@ -148,6 +86,12 @@ select {
   font-weight: 700;
 }
 
+.btn.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
 .btn.disabled,
 .btn:disabled {
   visibility: hidden;
@@ -173,7 +117,7 @@ select {
   opacity: 0.7;
 }
 
-.details-on .kanaBtn.active .num {
+.details[open] .kanaBtn.active .num {
   display: inline;
 }
 
@@ -194,19 +138,10 @@ select {
 .handSprite {
   width: var(--frame-w, 128px);
   height: var(--frame-h, 128px);
-
   background-image: url("../img/finger_binary_sprite_sheet.png");
   background-repeat: no-repeat;
-
   background-size: calc(var(--frame-w, 128px) * 8) calc(var(--frame-h, 128px) * 4);
-
   image-rendering: pixelated;
-}
-
-.handBox {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .handSprite.is-left {
@@ -214,12 +149,8 @@ select {
   transform-origin: center;
 }
 
-.details-off .details {
-  display: none;
-}
-
 .sequenceTools {
-  margin-top: 14px;
+  margin-top: 18px;
   display: grid;
   gap: 10px;
 }
