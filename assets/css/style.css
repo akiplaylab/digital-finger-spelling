@@ -190,3 +190,26 @@ select {
 .details[open] summary {
   margin-bottom: 8px;
 }
+
+.handSprite {
+  width: var(--frame-w, 128px);
+  height: var(--frame-h, 128px);
+
+  background-image: url("../img/finger_binary_sprite_sheet.png");
+  background-repeat: no-repeat;
+
+  background-size: calc(var(--frame-w, 128px) * 8) calc(var(--frame-h, 128px) * 4);
+
+  image-rendering: pixelated;
+}
+
+.handBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.handSprite.is-left {
+  transform: scaleX(-1);
+  transform-origin: center;
+}

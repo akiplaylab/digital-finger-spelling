@@ -1,5 +1,5 @@
 import { $, toBinary } from './utils.js';
-import { DATA, FINGER_DEFS, LEFT_HAND_FINGERS, RIGHT_HAND_FINGERS } from './constants.js';
+import { DATA, FINGER_DEFS, LEFT_HAND_FINGERS, RIGHT_HAND_FINGERS, SPRITE_BIT_BY_LABEL } from './constants.js';
 
 export const UI = {
   sel: null,
@@ -9,24 +9,42 @@ export const UI = {
   rightFingers: null,
 };
 
-export function renderHand(container, fingers, bitsUp) {
-  container.innerHTML = "";
+const SPRITE_COLS = 8;
+
+function toHandValue(bitsUp, fingers) {
+  let v = 0;
+
   for (const f of fingers) {
-    const d = document.createElement("div");
-    d.className = `finger ${f.h} ${(bitsUp & f.bit) ? "up" : ""}`;
+    const isUp = (bitsUp & f.bit) !== 0;
+    if (!isUp) continue;
 
-    const label = document.createElement("div");
-    label.className = "label";
-    label.textContent = f.label;
-
-    const bit = document.createElement("div");
-    bit.className = "bit";
-    bit.textContent = `(${f.bit})`;
-
-    d.appendChild(label);
-    d.appendChild(bit);
-    container.appendChild(d);
+    v |= SPRITE_BIT_BY_LABEL[f.label] ?? 0;
   }
+
+  return v;
+}
+
+function setSpriteFrame(el, value) {
+  const col = value % SPRITE_COLS;
+  const row = Math.floor(value / SPRITE_COLS);
+
+  const frameW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--frame-w")) || 128;
+  const frameH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--frame-h")) || 128;
+
+  el.style.backgroundPosition = `${-col * frameW}px ${-row * frameH}px`;
+}
+
+export function renderHand(container, fingers, bitsUp, { flipX = false } = {}) {
+  container.innerHTML = "";
+
+  const value = toHandValue(bitsUp, fingers);
+
+  const sprite = document.createElement("div");
+  sprite.className = "handSprite";
+  if (flipX) sprite.classList.add("is-left");
+
+  setSpriteFrame(sprite, value);
+  container.appendChild(sprite);
 }
 
 export function updateMetadata(item) {
@@ -54,7 +72,7 @@ export function setSelected(kana) {
 
   UI.sel.value = item.kana;
 
-  renderHand(UI.leftFingers, LEFT_HAND_FINGERS, item.id);
+  renderHand(UI.leftFingers, LEFT_HAND_FINGERS, item.id, { flipX: true });
   renderHand(UI.rightFingers, RIGHT_HAND_FINGERS, item.id);
 
   updateMetadata(item);

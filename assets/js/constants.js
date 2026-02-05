@@ -67,3 +67,11 @@ export const FINGER_DEFS = [
 
 export const LEFT_HAND_FINGERS = FINGER_DEFS.filter(f => f.side === "左");
 export const RIGHT_HAND_FINGERS = FINGER_DEFS.filter(f => f.side === "右");
+
+export const SPRITE_BIT_BY_LABEL = {
+  "親": 1,
+  "人": 2,
+  "中": 4,
+  "薬": 8,
+  "小": 16,
+};
