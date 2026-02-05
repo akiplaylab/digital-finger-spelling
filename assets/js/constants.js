@@ -1,0 +1,29 @@
+export const DATA = [
+  { id: 1, kana: "あ" }, { id: 2, kana: "い" }, { id: 3, kana: "う" }, { id: 4, kana: "え" }, { id: 5, kana: "お" },
+  { id: 6, kana: "か" }, { id: 7, kana: "き" }, { id: 8, kana: "く" }, { id: 9, kana: "け" }, { id: 10, kana: "こ" },
+  { id: 11, kana: "さ" }, { id: 12, kana: "し" }, { id: 13, kana: "す" }, { id: 14, kana: "せ" }, { id: 15, kana: "そ" },
+  { id: 16, kana: "た" }, { id: 17, kana: "ち" }, { id: 18, kana: "つ" }, { id: 19, kana: "て" }, { id: 20, kana: "と" },
+  { id: 21, kana: "な" }, { id: 22, kana: "に" }, { id: 23, kana: "ぬ" }, { id: 24, kana: "ね" }, { id: 25, kana: "の" },
+  { id: 26, kana: "は" }, { id: 27, kana: "ひ" }, { id: 28, kana: "ふ" }, { id: 29, kana: "へ" }, { id: 30, kana: "ほ" },
+  { id: 31, kana: "ま" }, { id: 32, kana: "み" }, { id: 33, kana: "む" }, { id: 34, kana: "め" }, { id: 35, kana: "も" },
+  { id: 36, kana: "や" }, { id: 37, kana: "" }, { id: 38, kana: "ゆ" }, { id: 39, kana: "" }, { id: 40, kana: "よ" },
+  { id: 41, kana: "ら" }, { id: 42, kana: "り" }, { id: 43, kana: "る" }, { id: 44, kana: "れ" }, { id: 45, kana: "ろ" },
+  { id: 46, kana: "わ" }, { id: 47, kana: "" }, { id: 48, kana: "" }, { id: 49, kana: "" }, { id: 50, kana: "を" },
+  { id: 51, kana: "ん" }
+];
+
+export const FINGER_DEFS = [
+  { side: "左", label: "親", bit: 512, h: "mid" },
+  { side: "左", label: "人", bit: 256, h: "tall" },
+  { side: "左", label: "中", bit: 128, h: "tall" },
+  { side: "左", label: "薬", bit: 64, h: "tall" },
+  { side: "左", label: "小", bit: 32, h: "tall" },
+  { side: "右", label: "小", bit: 16, h: "tall" },
+  { side: "右", label: "薬", bit: 8, h: "tall" },
+  { side: "右", label: "中", bit: 4, h: "tall" },
+  { side: "右", label: "人", bit: 2, h: "tall" },
+  { side: "右", label: "親", bit: 1, h: "mid" },
+];
+
+export const LEFT_HAND_FINGERS = FINGER_DEFS.filter(f => f.side === "左");
+export const RIGHT_HAND_FINGERS = FINGER_DEFS.filter(f => f.side === "右");
