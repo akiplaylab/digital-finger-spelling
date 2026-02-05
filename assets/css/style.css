@@ -60,66 +60,24 @@ select {
   border: 1px solid #ddd;
   border-radius: 12px;
   padding: 12px;
+  display: grid;
+  place-items: center;
+  min-height: 180px;
 }
 
-.fingers {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: flex-end;
-  height: 160px;
+.handSprite {
+  width: 47px;
+  height: 47px;
+  border-radius: 8px;
+  background-image: url('../img/hand-sprite.png');
+  background-repeat: no-repeat;
+  background-size: 376px auto;
+  image-rendering: pixelated;
+  transform-origin: center;
 }
 
-.finger {
-  width: 56px;
-  border-radius: 10px;
-  border: 1px solid #bbb;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 0;
-  font-weight: 700;
-  user-select: none;
-  background: #f3f3f3;
-  color: #777;
-}
-
-.up,
-.btn.active {
-  background: #111;
-  color: #fff;
-  border-color: #111;
-}
-
-.finger.small {
-  height: 95px;
-}
-
-.finger.mid {
-  height: 125px;
-}
-
-.finger.tall {
-  height: 150px;
-}
-
-.finger .label {
-  font-weight: 800;
-}
-
-.finger .bit {
-  font-size: 12px;
-  opacity: 0.9;
-}
-
-.finger.up .bit {
-  opacity: 0.75;
-}
-
-.bits-off .finger .bit {
-  display: none;
+.handSprite.mirror {
+  transform: scaleX(-1);
 }
 
 .meta {
@@ -171,6 +129,12 @@ select {
   display: none;
   font-size: 12px;
   opacity: 0.7;
+}
+
+.btn.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
 }
 
 .kanaBtn.active .num {
