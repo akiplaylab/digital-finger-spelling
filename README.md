@@ -3,6 +3,14 @@
 Digital Finger Spelling（デジタル指話）は、日本語の 50 音を二進数に変換し、
 両手の指の状態として視覚的に表現するシステムです。
 
+## Example: こんにちは
+
+<p align="center">
+  <img src="assets/konnichiwa.gif" alt="こんにちは（デジタル指話）" width="480" />
+</p>
+
+各フレームは日本語の 1 文字を、指の二進数表現として示しています。
+
 ## Concept
 
 - 日本語 50 音を 1 〜 50 の整数に対応付け
