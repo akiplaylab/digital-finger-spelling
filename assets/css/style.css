@@ -2,7 +2,6 @@
   font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
 }
 
-
 :root {
   --bg: #f5f5f7;
   --text: #16181d;
@@ -130,10 +129,14 @@ body {
   border-color: var(--accent);
 }
 
-.btn.disabled,
-.btn:disabled {
+.btn.disabled {
   visibility: hidden;
   pointer-events: none;
+}
+
+.optBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .kanaBtn {
@@ -299,4 +302,17 @@ body {
   .card {
     padding: 12px;
   }
+}
+
+.optionBar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.optBtn {
+  width: 64px;
+  padding: 12px 0;
+  font-size: 20px;
 }
