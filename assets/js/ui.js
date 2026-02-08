@@ -22,9 +22,23 @@ export const UI = {
 const SPRITE_COLS = 8;
 let animationRunId = 0;
 
-let selectedBaseItem = null;
-let selectedOpt = 0;
-let selectedDisplayKana = null;
+const kanaToItem = new Map(
+  DATA
+    .filter(item => item.kana)
+    .map(item => [item.kana, item])
+);
+
+const OPTION_CONFIG = {
+  [OPT.DAKUTEN]: { label: '゛', map: DAKUTEN_MAP },
+  [OPT.HANDAKUTEN]: { label: '゜', map: HANDAKUTEN_MAP },
+  [OPT.SMALL]: { label: '小', map: SMALL_MAP },
+};
+
+let selectedState = {
+  baseItem: null,
+  opt: 0,
+  displayKana: null,
+};
 
 const THEME_STORAGE_KEY = 'dfs-theme';
 
@@ -59,26 +73,20 @@ function wait(ms) {
 }
 
 function applyOption(baseKana, opt) {
-  if (opt === OPT.DAKUTEN) return DAKUTEN_MAP[baseKana] ?? null;
-  if (opt === OPT.HANDAKUTEN) return HANDAKUTEN_MAP[baseKana] ?? null;
-  if (opt === OPT.SMALL) return SMALL_MAP[baseKana] ?? null;
-  return null;
+  return OPTION_CONFIG[opt]?.map[baseKana] ?? null;
 }
 
 function getOptLabel(opt) {
-  if (opt === OPT.DAKUTEN) return '゛';
-  if (opt === OPT.HANDAKUTEN) return '゜';
-  if (opt === OPT.SMALL) return '小';
-  return '';
+  return OPTION_CONFIG[opt]?.label ?? '';
 }
 
 function updateOptionButtons() {
-  const baseKana = selectedBaseItem?.kana ?? null;
+  const baseKana = selectedState.baseItem?.kana ?? null;
 
   const setBtn = (btn, opt) => {
     if (!btn) return;
 
-    const isActive = selectedOpt === opt;
+    const isActive = selectedState.opt === opt;
     btn.classList.toggle('active', isActive);
 
     if (!baseKana) {
@@ -105,7 +113,7 @@ function normalizeInputToItems(text) {
   const unknown = [];
 
   for (const ch of chars) {
-    const item = DATA.find(x => x.kana === ch);
+    const item = kanaToItem.get(ch);
     if (item) {
       items.push({ baseItem: item, opt: 0, displayKana: item.kana, code: item.id });
       continue;
@@ -113,7 +121,7 @@ function normalizeInputToItems(text) {
 
     const rev = REVERSE_MAP[ch];
     if (rev) {
-      const baseItem = DATA.find(x => x.kana === rev.base);
+      const baseItem = kanaToItem.get(rev.base);
       if (baseItem) {
         items.push({ baseItem, opt: rev.opt, displayKana: ch, code: baseItem.id | rev.opt });
         continue;
@@ -187,50 +195,58 @@ export function updateGridSelection(kana) {
 }
 
 export function setSelected(kana) {
-  const item = DATA.find(x => x.kana === kana) ?? DATA.find(x => x.kana);
+  const item = kanaToItem.get(kana) ?? kanaToItem.values().next().value;
   if (!item) return;
 
-  selectedBaseItem = item;
-  selectedOpt = 0;
-  selectedDisplayKana = item.kana;
+  selectedState = {
+    baseItem: item,
+    opt: 0,
+    displayKana: item.kana,
+  };
 
   renderSelected();
   updateGridSelection(item.kana);
 }
 
 function renderSelected() {
-  if (!selectedBaseItem) return;
+  if (!selectedState.baseItem) return;
 
-  const code = selectedBaseItem.id | (selectedOpt ?? 0);
+  const code = selectedState.baseItem.id | (selectedState.opt ?? 0);
 
   renderHand(UI.leftFingers, LEFT_HAND_FINGERS, code, { flipX: true });
   renderHand(UI.rightFingers, RIGHT_HAND_FINGERS, code);
 
-  UI.currentKana.textContent = selectedDisplayKana ?? selectedBaseItem.kana;
+  UI.currentKana.textContent = selectedState.displayKana ?? selectedState.baseItem.kana;
   updateMetadata({
-    baseKana: selectedBaseItem.kana,
-    baseId: selectedBaseItem.id,
-    opt: selectedOpt,
-    displayKana: selectedDisplayKana ?? selectedBaseItem.kana,
+    baseKana: selectedState.baseItem.kana,
+    baseId: selectedState.baseItem.id,
+    opt: selectedState.opt,
+    displayKana: selectedState.displayKana ?? selectedState.baseItem.kana,
     code,
   });
 }
 
 function applyOptionToCurrent(opt) {
-  if (!selectedBaseItem) return;
+  if (!selectedState.baseItem) return;
 
-  if (selectedOpt === opt) {
-    selectedOpt = 0;
-    selectedDisplayKana = selectedBaseItem.kana;
+  if (selectedState.opt === opt) {
+    selectedState = {
+      ...selectedState,
+      opt: 0,
+      displayKana: selectedState.baseItem.kana,
+    };
     renderSelected();
     return;
   }
 
-  const replaced = applyOption(selectedBaseItem.kana, opt);
+  const replaced = applyOption(selectedState.baseItem.kana, opt);
   if (!replaced) return;
 
-  selectedOpt = opt;
-  selectedDisplayKana = replaced;
+  selectedState = {
+    ...selectedState,
+    opt,
+    displayKana: replaced,
+  };
   renderSelected();
 }
 
@@ -251,9 +267,11 @@ async function playSequence() {
   for (const item of items) {
     if (runId !== animationRunId) return;
 
-    selectedBaseItem = item.baseItem;
-    selectedOpt = item.opt;
-    selectedDisplayKana = item.displayKana;
+    selectedState = {
+      baseItem: item.baseItem,
+      opt: item.opt,
+      displayKana: item.displayKana,
+    };
     renderSelected();
     updateGridSelection(item.baseItem.kana);
     await wait(stepMs);
