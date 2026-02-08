@@ -75,3 +75,38 @@ export const SPRITE_BIT_BY_LABEL = {
   "薬": 8,
   "小": 16,
 };
+
+export const OPT = {
+  DAKUTEN: 64,
+  HANDAKUTEN: 128,
+  SMALL: 256,
+};
+
+export const DAKUTEN_MAP = {
+  "か": "が", "き": "ぎ", "く": "ぐ", "け": "げ", "こ": "ご",
+  "さ": "ざ", "し": "じ", "す": "ず", "せ": "ぜ", "そ": "ぞ",
+  "た": "だ", "ち": "ぢ", "つ": "づ", "て": "で", "と": "ど",
+  "は": "ば", "ひ": "び", "ふ": "ぶ", "へ": "べ", "ほ": "ぼ",
+};
+
+export const HANDAKUTEN_MAP = {
+  "は": "ぱ", "ひ": "ぴ", "ふ": "ぷ", "へ": "ぺ", "ほ": "ぽ",
+};
+
+export const SMALL_MAP = {
+  "あ": "ぁ", "い": "ぃ", "う": "ぅ", "え": "ぇ", "お": "ぉ",
+  "や": "ゃ", "ゆ": "ゅ", "よ": "ょ", "つ": "っ",
+};
+
+export const REVERSE_MAP = (() => {
+  const out = {};
+  const add = (base, opt, map) => {
+    for (const [k, v] of Object.entries(map)) {
+      out[v] = { base: k, opt };
+    }
+  };
+  add("dakuten", OPT.DAKUTEN, DAKUTEN_MAP);
+  add("handakuten", OPT.HANDAKUTEN, HANDAKUTEN_MAP);
+  add("small", OPT.SMALL, SMALL_MAP);
+  return out;
+})();
