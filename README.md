@@ -1,6 +1,19 @@
 # Digital Finger Spelling
 
-🇯🇵 Japanese version: [README.ja.md](README.ja.md)
+<div style="margin: 10px 0 18px 0;">
+  <a href="./README.md"
+     style="display:inline-block;padding:6px 14px;margin-right:6px;border-radius:4px;
+            border:1.5px solid #0969da;background:#0969da;color:#ffffff;
+            text-decoration:none;font-weight:500;font-size:14px;">
+    English
+  </a>
+  <a href="./README.ja.md"
+     style="display:inline-block;padding:6px 14px;border-radius:4px;
+            border:1.5px solid #0969da;background:transparent;color:#0969da;
+            text-decoration:none;font-weight:500;font-size:14px;">
+    日本語
+  </a>
+</div>
 
 Digital Finger Spelling is a system that converts the 50 Japanese syllables
 into binary numbers and visualizes them as finger states using both hands.
