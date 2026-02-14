@@ -1,15 +1,9 @@
-# Digital Finger Spelling（デジタル指話）
+# デジタル指話（Digital Finger Spelling）
 
-Digital Finger Spelling（デジタル指話）は、日本語の 50 音を二進数に変換し、
+デジタル指話（Digital Finger Spelling）は、日本語の 50 音を二進数に変換し、
 両手の指の状態として視覚的に表現するシステムです。
 
-## Example: こんにちは
-
-<p align="center">
-  <img src="assets/konnichiwa.gif" alt="こんにちは（デジタル指話）" width="480" />
-</p>
-
-各フレームは日本語の 1 文字を、指の二進数表現として示しています。
+<img width="1200" height="628" alt="image" src="https://github.com/user-attachments/assets/faf62b06-1824-4ae6-978d-04ed6e4eb31d" />
 
 ## Concept
 
@@ -28,7 +22,7 @@ Digital Finger Spelling（デジタル指話）は、日本語の 50 音を二�
 GitHub Pages 上でアプリを公開しています。
 ブラウザ上ですぐにデジタル指話を試すことができます。
 
-👉 https://akiplaylab.github.io/digital-finger-spelling/
+👉 [デジタル指話を起動](https://akiplaylab.github.io/digital-finger-spelling/)
 
 ## Status
 
