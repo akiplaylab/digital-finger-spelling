@@ -1,5 +1,9 @@
 # デジタル指話（Digital Finger Spelling）
 
+[![Deploy to GitHub Pages](https://github.com/akiplaylab/digital-finger-spelling/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/akiplaylab/digital-finger-spelling/actions/workflows/deploy-pages.yml)
+
+👉 https://akiplaylab.github.io/digital-finger-spelling/
+
 <table>
   <tr>
     <th align="center"><a href="./README.md">English</a></th>
