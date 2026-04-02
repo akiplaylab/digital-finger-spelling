@@ -18,7 +18,7 @@ into binary numbers and visualizes them as finger states using both hands.
 
 ## Concept
 
-- Map Japanese syllables (あ–ん) to integers (1–50)
+- Map Japanese syllables (あ – ん) to integers (1–50)
 - Convert the integer into binary
 - Assign each bit to a finger (left/right hands)
 - The little fingers meet at the center, thumbs face outward
@@ -37,16 +37,6 @@ Total: 10-bit representation (0–1023)
 Try it directly in your browser:
 
 👉 https://akiplaylab.github.io/digital-finger-spelling/
-
-## Example
-
-The phrase "こんにちは" can be expressed as a sequence of finger states,
-each frame representing one syllable in binary form.
-
-## Status
-
-🚧 Work in progress
-Experimental web-based visualizer.
 
 ## License
 
