@@ -41,11 +41,6 @@
 
 👉 https://akiplaylab.github.io/digital-finger-spelling/
 
-## 例
-
-「こんにちは」は、各文字を順に二進数へ変換し、
-指の状態として連続的に表示することができます。
-
 ## ライセンス
 
 MIT License
