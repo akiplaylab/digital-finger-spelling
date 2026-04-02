@@ -18,7 +18,7 @@ into binary numbers and visualizes them as finger states using both hands.
 
 ## Concept
 
-- Map Japanese syllables (あ–ん) to integers (1–50)
+- Map Japanese syllables (あ – ん) to integers (1–50)
 - Convert the integer into binary
 - Assign each bit to a finger (left/right hands)
 - The little fingers meet at the center, thumbs face outward
