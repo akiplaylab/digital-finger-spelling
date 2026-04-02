@@ -38,16 +38,6 @@ Try it directly in your browser:
 
 👉 https://akiplaylab.github.io/digital-finger-spelling/
 
-## Example
-
-The phrase "こんにちは" can be expressed as a sequence of finger states,
-each frame representing one syllable in binary form.
-
-## Status
-
-🚧 Work in progress
-Experimental web-based visualizer.
-
 ## License
 
 MIT License
